@@ -29,6 +29,16 @@ tachyon_cc_library(
     ],
 )
 
+tachyon_cc_library(
+    name = "blake2b_transcript",
+    hdrs = ["blake2b_transcript.h"],
+    deps = [
+        ":transcript",
+        "//tachyon/base/buffer:vector_buffer",
+        "@com_google_boringssl//:crypto",
+    ],
+)
+
 tachyon_cc_unittest(
     name = "transcript_unittests",
     srcs = [
