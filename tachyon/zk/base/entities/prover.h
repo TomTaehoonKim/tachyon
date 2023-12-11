@@ -46,8 +46,7 @@ class Prover : public Entity<PCSTy> {
 
     Commitment commitment;
     if (!this->pcs_.CommitLagrange(evals, &commitment)) return false;
-    GetWriter()->WriteToProof(commitment);
-    return true;
+    return GetWriter()->WriteToProof(commitment);
   }
 
   bool CommitEvalsWithBlind(const Evals& evals, BlindedPolynomial<Poly>* out) {
@@ -56,9 +55,9 @@ class Prover : public Entity<PCSTy> {
     return true;
   }
 
-  void Evaluate(const Poly& poly, const F& x) {
+  bool Evaluate(const Poly& poly, const F& x) {
     F result = poly.Evaluate(x);
-    GetWriter()->WriteToProof(result);
+    return GetWriter()->WriteToProof(result);
   }
 
  protected:
