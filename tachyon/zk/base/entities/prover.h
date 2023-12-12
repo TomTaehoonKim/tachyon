@@ -41,7 +41,7 @@ class Prover : public Entity<PCSTy> {
     return this->domain_->size() - (blinder_.blinding_factors() + 1);
   }
 
-  bool CommitEvals(const Evals& evals) {
+  [[nodiscard]] bool CommitEvals(const Evals& evals) {
     if (evals.NumElements() != this->domain_->size()) return false;
 
     Commitment commitment;
@@ -49,13 +49,14 @@ class Prover : public Entity<PCSTy> {
     return GetWriter()->WriteToProof(commitment);
   }
 
-  bool CommitEvalsWithBlind(const Evals& evals, BlindedPolynomial<Poly>* out) {
+  [[nodiscard]] bool CommitEvalsWithBlind(const Evals& evals,
+                                          BlindedPolynomial<Poly>* out) {
     if (!CommitEvals(evals)) return false;
     *out = {this->domain_->IFFT(evals), blinder_.Generate()};
     return true;
   }
 
-  bool Evaluate(const Poly& poly, const F& x) {
+  [[nodiscard]] bool Evaluate(const Poly& poly, const F& x) {
     F result = poly.Evaluate(x);
     return GetWriter()->WriteToProof(result);
   }
