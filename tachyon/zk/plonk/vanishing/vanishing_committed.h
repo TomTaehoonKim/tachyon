@@ -19,38 +19,39 @@ class VanishingCommitted;
 template <typename PCSTy>
 class VanishingCommitted<EntityTy::kProver, PCSTy> {
  public:
+  using F = typename PCSTy::Field;
+  using Poly = typename PCSTy::Poly;
+
   VanishingCommitted() = default;
-  VanishingCommitted(typename PCSTy::Poly&& random_poly,
-                     typename PCSTy::Field&& random_blind)
+  VanishingCommitted(Poly&& random_poly, F&& random_blind)
       : random_poly_(std::move(random_poly)),
         random_blind_(std::move(random_blind)) {}
 
-  const typename PCSTy::Poly& random_poly() { return random_poly_; }
+  const Poly& random_poly() { return random_poly_; }
 
-  typename PCSTy::Poly&& TakeRandomPoly() && { return std::move(random_poly_); }
-  typename PCSTy::Field&& TakeRandomBlind() && {
-    return std::move(random_blind_);
-  }
+  Poly&& TakeRandomPoly() && { return std::move(random_poly_); }
+  F&& TakeRandomBlind() && { return std::move(random_blind_); }
 
  private:
-  typename PCSTy::Poly random_poly_;
-  typename PCSTy::Field random_blind_;
+  Poly random_poly_;
+  F random_blind_;
 };
 
 template <typename PCSTy>
 class VanishingCommitted<EntityTy::kVerifier, PCSTy> {
  public:
+  using Commitment = typename PCSTy::Commitment;
+
   VanishingCommitted() = default;
-  explicit VanishingCommitted(
-      typename PCSTy::Commitment&& random_poly_commitment)
+  explicit VanishingCommitted(Commitment&& random_poly_commitment)
       : random_poly_commitment_(std::move(random_poly_commitment)) {}
 
-  typename PCSTy::Commitment&& TakeRandomPolyCommitment() && {
+  Commitment&& TakeRandomPolyCommitment() && {
     return std::move(random_poly_commitment_);
   }
 
  private:
-  typename PCSTy::Commitment random_poly_commitment_;
+  Commitment random_poly_commitment_;
 };
 
 }  // namespace tachyon::zk

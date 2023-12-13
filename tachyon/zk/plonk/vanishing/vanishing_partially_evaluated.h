@@ -15,29 +15,29 @@ namespace tachyon::zk {
 template <typename PCSTy>
 class VanishingPartiallyEvaluated {
  public:
+  using F = typename PCSTy::Field;
+  using Commitment = typename PCSTy::Commitment;
+
   VanishingPartiallyEvaluated() = default;
-  VanishingPartiallyEvaluated(
-      std::vector<typename PCSTy::Commitment>&& h_commitments,
-      typename PCSTy::Commitment&& random_poly_commitment,
-      typename PCSTy::Field&& random_eval)
+  VanishingPartiallyEvaluated(std::vector<Commitment>&& h_commitments,
+                              Commitment&& random_poly_commitment,
+                              F&& random_eval)
       : h_commitments_(std::move(h_commitments)),
         random_poly_commitment_(std::move(random_poly_commitment)),
         random_eval_(std::move(random_eval)) {}
 
-  const std::vector<typename PCSTy::Commitment>& h_commitments() const {
+  const std::vector<Commitment>& h_commitments() const {
     return h_commitments_;
   }
-  typename PCSTy::Commitment&& TakeRandomPolyCommitment() && {
+  Commitment&& TakeRandomPolyCommitment() && {
     return std::move(random_poly_commitment_);
   }
-  typename PCSTy::Field&& TakeRandomEval() && {
-    return std::move(random_eval_);
-  }
+  F&& TakeRandomEval() && { return std::move(random_eval_); }
 
  private:
-  std::vector<typename PCSTy::Commitment> h_commitments_;
-  typename PCSTy::Commitment random_poly_commitment_;
-  typename PCSTy::Field random_eval_;
+  std::vector<Commitment> h_commitments_;
+  Commitment random_poly_commitment_;
+  F random_eval_;
 };
 
 }  // namespace tachyon::zk

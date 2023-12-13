@@ -26,16 +26,19 @@ namespace tachyon::zk {
 template <typename PCSTy>
 [[nodiscard]] bool VanishingCommit(
     Prover<PCSTy>* prover, VanishingCommitted<EntityTy::kProver, PCSTy>* out) {
+  using F = typename PCSTy::Field;
+  using Poly = typename PCSTy::Poly;
+  using Evals = typename PCSTy::Evals;
+
   // Sample a random polynomial of degree n - 1
-  const typename PCSTy::Evals random_eval =
-      PCSTy::Evals::One(prover->pcs().N());
-  typename PCSTy::Poly random_poly = prover->domain()->IFFT(random_eval);
+  const Evals random_eval = Evals::One(prover->pcs().N());
+  Poly random_poly = prover->domain()->IFFT(random_eval);
 
   // Sample a random blinding factor
   // TODO(TomTaehoonKim): Figure out why it is named |random_blind|.
   // See
   // https://github.com/kroma-network/halo2/blob/7d0a36990452c8e7ebd600de258420781a9b7917/halo2_proofs/src/plonk/vanishing/prover.rs#L55-L56
-  typename PCSTy::Field random_blind = PCSTy::Field::Zero();
+  F random_blind = F::Zero();
 
   if (!prover->Commit(random_poly)) return false;
 
@@ -49,36 +52,38 @@ template <typename PCSTy, typename ExtendedEvals>
     VanishingCommitted<EntityTy::kProver, PCSTy>&& committed,
     const ExtendedEvals& linear_combination_of_gates,
     VanishingConstructed<EntityTy::kProver, PCSTy>* constructed_out) {
+  using F = typename PCSTy::Field;
+  using ExtendedPoly = typename PCSTy::ExtendedPoly;
+
   // Divide by t(X) = X^{params.n} - 1.
-  ExtendedEvals h_evals = DivideByVanishingPoly<typename PCSTy::Field>(
+  ExtendedEvals h_evals = DivideByVanishingPoly<F>(
       linear_combination_of_gates, prover->extended_domain(), prover->domain());
 
   // Obtain final h(X) polynomial
-  typename PCSTy::ExtendedPoly h_poly =
-      ExtendedToCoeff<typename PCSTy::Field, typename PCSTy::ExtendedPoly>(
-          h_evals, prover->extended_domain());
+  ExtendedPoly h_poly =
+      ExtendedToCoeff<F, ExtendedPoly>(h_evals, prover->extended_domain());
 
   // Truncate it to match the size of the quotient polynomial; the
   // evaluation domain might be slightly larger than necessary because
   // it always lies on a power-of-two boundary.
-  std::vector<typename PCSTy::Field> h_coeffs =
-      h_poly.coefficients().coefficients();
-  h_coeffs.resize(prover->extended_domain()->size(), PCSTy::Field::Zero());
+  std::vector<F> h_coeffs = h_poly.coefficients().coefficients();
+  h_coeffs.resize(prover->extended_domain()->size(), F::Zero());
 
   // Compute commitments to each h(X) piece
   const size_t kCommitmentNum = h_coeffs.size() / prover->pcs().N();
 
   std::vector<bool> results = base::ParallelizeMapByChunkSize(
       h_coeffs, prover->pcs().N(),
-      [prover](absl::Span<const typename PCSTy::Field> h_piece,
-               size_t chunk_index) { return prover->Commit(h_piece); });
+      [prover](absl::Span<const F> h_piece, size_t chunk_index) {
+        return prover->Commit(h_piece);
+      });
   if (std::any_of(results.begin(), results.end(),
                   [](bool result) { return result == false; })) {
     return false;
   }
 
   // FIXME(TomTaehoonKim): Remove this if possible.
-  std::vector<typename PCSTy::Field> h_blinds = base::CreateVector(
+  std::vector<F> h_blinds = base::CreateVector(
       kCommitmentNum, [prover]() { return prover->blinder().Generate(); });
 
   *constructed_out = {std::move(h_poly), std::move(h_blinds),
@@ -93,7 +98,10 @@ template <typename PCSTy, typename F, typename Commitment>
     const crypto::Challenge255<F>& x, const F& x_n,
     crypto::TranscriptWriter<Commitment>* writer,
     VanishingEvaluated<EntityTy::kProver, PCSTy>* evaluated_out) {
-  typename PCSTy::Poly h_poly = PCSTy::Poly::Zero();
+  using Poly = typename PCSTy::Poly;
+  using Coeffs = typename Poly::Coefficients;
+
+  Poly h_poly = Poly::Zero();
   auto h_chunks = base::Chunked(
       constructed.h_poly().coefficients().coefficients(), pcs.N());
   auto h_pieces =
@@ -101,9 +109,7 @@ template <typename PCSTy, typename F, typename Commitment>
                 [](const absl::Span<const F>& h_piece) { return h_piece; });
   for (absl::Span<const F> h_piece : base::Reversed(h_pieces)) {
     std::vector<F> h_vec(h_piece.begin(), h_piece.end());
-    h_poly = h_poly * x_n +
-             typename PCSTy::Poly(
-                 typename PCSTy::Poly::Coefficients(std::move(h_vec)));
+    h_poly = h_poly * x_n + Poly(Coeffs(std::move(h_vec)));
   }
 
   F h_blind = std::accumulate(constructed.h_blinds().rbegin(),
@@ -127,17 +133,18 @@ template <typename PCSTy, typename F>
 std::vector<ProverQuery<PCSTy>> VanishingOpen(
     VanishingEvaluated<EntityTy::kProver, PCSTy>&& evaluated,
     const crypto::Challenge255<F>& x) {
+  using Poly = typename PCSTy::Poly;
+
   F x_scalar = x.ChallengeAsScalar();
   VanishingCommitted<EntityTy::kProver, PCSTy>&& committed =
       std::move(evaluated).TakeCommitted();
-  return {{x_scalar, BlindedPolynomial<typename PCSTy::Poly>(
-                         std::move(evaluated).TakeHPoly(),
-                         std::move(evaluated).TakeHBlind())
-                         .ToRef()},
-          {x_scalar, BlindedPolynomial<typename PCSTy::Poly>(
-                         std::move(committed).TakeRandomPoly(),
-                         std::move(committed).TakeRandomBlind())
-                         .ToRef()}};
+  return {
+      {x_scalar, BlindedPolynomial<Poly>(std::move(evaluated).TakeHPoly(),
+                                         std::move(evaluated).TakeHBlind())
+                     .ToRef()},
+      {x_scalar, BlindedPolynomial<Poly>(std::move(committed).TakeRandomPoly(),
+                                         std::move(committed).TakeRandomBlind())
+                     .ToRef()}};
 }
 
 }  // namespace tachyon::zk

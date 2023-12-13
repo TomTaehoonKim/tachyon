@@ -21,48 +21,50 @@ class VanishingConstructed;
 template <typename PCSTy>
 class VanishingConstructed<EntityTy::kProver, PCSTy> {
  public:
+  using F = typename PCSTy::Field;
+  using ExtendedPoly = typename PCSTy::ExtendedPoly;
+
   VanishingConstructed() = default;
-  VanishingConstructed(typename PCSTy::ExtendedPoly&& h_poly,
-                       std::vector<typename PCSTy::Field>&& h_blinds,
+  VanishingConstructed(ExtendedPoly&& h_poly, std::vector<F>&& h_blinds,
                        VanishingCommitted<EntityTy::kProver, PCSTy>&& committed)
       : h_poly_(std::move(h_poly)),
         h_blinds_(std::move(h_blinds)),
         committed_(std::move(committed)) {}
 
-  const typename PCSTy::ExtendedPoly& h_poly() const { return h_poly_; }
-  const std::vector<typename PCSTy::Field>& h_blinds() const {
-    return h_blinds_;
-  }
+  const ExtendedPoly& h_poly() const { return h_poly_; }
+  const std::vector<F>& h_blinds() const { return h_blinds_; }
 
   VanishingCommitted<EntityTy::kProver, PCSTy>&& TakeCommitted() && {
     return std::move(committed_);
   }
 
  private:
-  typename PCSTy::ExtendedPoly h_poly_;
-  std::vector<typename PCSTy::Field> h_blinds_;
+  ExtendedPoly h_poly_;
+  std::vector<F> h_blinds_;
   VanishingCommitted<EntityTy::kProver, PCSTy> committed_;
 };
 
 template <typename PCSTy>
 class VanishingConstructed<EntityTy::kVerifier, PCSTy> {
  public:
+  using Commitment = typename PCSTy::Commitment;
+
   VanishingConstructed() = default;
-  VanishingConstructed(std::vector<typename PCSTy::Commitment>&& h_commitments,
-                       typename PCSTy::Commitment&& random_poly_commitment)
+  VanishingConstructed(std::vector<Commitment>&& h_commitments,
+                       Commitment&& random_poly_commitment)
       : h_commitments_(std::move(h_commitments)),
         random_poly_commitment_(std::move(random_poly_commitment)) {}
 
-  std::vector<typename PCSTy::Commitment>&& TakeHCommitments() && {
+  std::vector<Commitment>&& TakeHCommitments() && {
     return std::move(h_commitments_);
   }
-  typename PCSTy::Commitment&& TakeRandomPolyCommitment() && {
+  Commitment&& TakeRandomPolyCommitment() && {
     return std::move(random_poly_commitment_);
   }
 
  private:
-  std::vector<typename PCSTy::Commitment> h_commitments_;
-  typename PCSTy::Commitment random_poly_commitment_;
+  std::vector<Commitment> h_commitments_;
+  Commitment random_poly_commitment_;
 };
 
 }  // namespace tachyon::zk

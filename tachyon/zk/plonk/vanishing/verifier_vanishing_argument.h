@@ -71,6 +71,8 @@ template <typename PCSTy, typename Evals, typename F>
 VanishingEvaluated<EntityTy::kVerifier, PCSTy> VanishingVerify(
     VanishingPartiallyEvaluated<PCSTy>&& partially_evaluated,
     const Evals& expressions, const crypto::Challenge255<F>& y, const F& x_n) {
+  using Commitment = typename PCSTy::Commitment;
+
   F y_scalar = y.ChallengeAsScalar();
   F expected_h_eval = std::accumulate(
       expressions.evaluations().begin(), expressions.evaluations().end(),
@@ -80,11 +82,10 @@ VanishingEvaluated<EntityTy::kVerifier, PCSTy> VanishingVerify(
       });
   expected_h_eval *= (x_n - F::One()).Inverse();
 
-  typename PCSTy::Commitment h_commitment = std::accumulate(
+  Commitment h_commitment = std::accumulate(
       partially_evaluated.h_commitments().rbegin(),
-      partially_evaluated.h_commitments().rend(), PCSTy::Commitment::Zero(),
-      [&x_n](typename PCSTy::Commitment& acc,
-             const typename PCSTy::Commitment& commitment) {
+      partially_evaluated.h_commitments().rend(), Commitment::Zero(),
+      [&x_n](Commitment& acc, const Commitment& commitment) {
         return (acc * x_n + commitment).ToAffine();
       });
 
@@ -98,14 +99,14 @@ template <typename PCSTy, typename F>
 std::vector<VerifierQuery<PCSTy>> VanishingQueries(
     VanishingEvaluated<EntityTy::kVerifier, PCSTy>&& evaluated,
     const crypto::Challenge255<F>& x) {
-  return {
-      {x.ChallengeAsScalar(),
-       base::Ref<const typename PCSTy::Commitment>(&evaluated.h_commitment()),
-       std::move(evaluated).TakeExpectedHEval()},
-      {std::move(x.ChallengeAsScalar()),
-       base::Ref<const typename PCSTy::Commitment>(
-           &evaluated.random_poly_commitment()),
-       std::move(evaluated).TakeRandomEval()}};
+  using Commitment = typename PCSTy::Commitment;
+
+  return {{x.ChallengeAsScalar(),
+           base::Ref<const Commitment>(&evaluated.h_commitment()),
+           std::move(evaluated).TakeExpectedHEval()},
+          {std::move(x.ChallengeAsScalar()),
+           base::Ref<const Commitment>(&evaluated.random_poly_commitment()),
+           std::move(evaluated).TakeRandomEval()}};
 }
 
 }  // namespace tachyon::zk
