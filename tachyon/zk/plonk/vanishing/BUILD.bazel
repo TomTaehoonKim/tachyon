@@ -118,6 +118,7 @@ tachyon_cc_library(
         ":vanishing_evaluated",
         ":vanishing_partially_evaluated",
         "//tachyon/crypto/transcripts:transcript",
+        "//tachyon/math/elliptic_curves:points",
         "//tachyon/zk/base:verifier_query",
         "//tachyon/zk/plonk/keys:verifying_key",
     ],

@@ -30,9 +30,9 @@ constexpr F GetZetaInv() {
 // polynomial of the 2ᵏ size domain.
 template <typename F, typename Domain, typename ExtendedDomain,
           typename ExtendedEvals>
-ExtendedEvals DivideByVanishingPoly(const ExtendedEvals& evals,
-                                    const ExtendedDomain* extended_domain,
-                                    const Domain* domain) {
+ExtendedEvals& DivideByVanishingPolyInPlace(
+    ExtendedEvals& evals, const ExtendedDomain* extended_domain,
+    const Domain* domain) {
   CHECK_EQ(evals.NumElements(), extended_domain->size());
 
   F zeta = GetZetaInv<F>().Square();
@@ -66,7 +66,7 @@ ExtendedEvals DivideByVanishingPoly(const ExtendedEvals& evals,
 
   // Multiply the inverse to obtain the quotient polynomial in the coset
   // evaluation domain.
-  std::vector<F> evaluations = evals.evaluations();
+  std::vector<F>& evaluations = evals.evaluations_ref();
   base::Parallelize(evaluations,
                     [t_evaluations](absl::Span<F> chunk, size_t chunk_idx,
                                     size_t chunk_size) {
@@ -77,7 +77,19 @@ ExtendedEvals DivideByVanishingPoly(const ExtendedEvals& evals,
                       }
                     });
 
-  return ExtendedEvals(std::move(evaluations));
+  return evals;
+}
+
+// This divides the polynomial (in the extended domain) by the vanishing
+// polynomial of the 2ᵏ size domain.
+template <typename F, typename Domain, typename ExtendedDomain,
+          typename ExtendedEvals>
+ExtendedEvals DivideByVanishingPoly(const ExtendedEvals& evals,
+                                    const ExtendedDomain* extended_domain,
+                                    const Domain* domain) {
+  ExtendedEvals ret = evals;
+  DivideByVanishingPolyInPlace<F>(ret, extended_domain, domain);
+  return ret;
 }
 
 // Given a |poly| of coefficients  [a₀, a₁, a₂, ...], this returns
@@ -87,7 +99,7 @@ ExtendedEvals DivideByVanishingPoly(const ExtendedEvals& evals,
 // |into_coset| should be set to true when moving into the coset, and false
 // when moving out. This toggles the choice of ζ.
 template <typename F, typename ExtendedPoly>
-void DistributePowersZeta(const ExtendedPoly& poly, bool into_coset) {
+void DistributePowersZeta(ExtendedPoly& poly, bool into_coset) {
   F zeta_inv = GetZetaInv<F>();
   F zeta = zeta_inv.Square();
   std::vector<F> coset_powers{into_coset ? zeta : zeta_inv,

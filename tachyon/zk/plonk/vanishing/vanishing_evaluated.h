@@ -25,21 +25,21 @@ class VanishingEvaluated<EntityTy::kProver, PCSTy> {
   using Poly = typename PCSTy::Poly;
 
   VanishingEvaluated() = default;
-  VanishingEvaluated(Poly&& h_poly, F&& h_blind,
+  VanishingEvaluated(Poly&& h_poly, F&& h_blinds_poly_eval,
                      VanishingCommitted<EntityTy::kProver, PCSTy>&& committed)
       : h_poly_(std::move(h_poly)),
-        h_blind_(std::move(h_blind)),
+        h_blinds_poly_eval_(std::move(h_blinds_poly_eval)),
         committed_(std::move(committed)) {}
 
   Poly&& TakeHPoly() && { return std::move(h_poly_); }
-  F&& TakeHBlind() && { return std::move(h_blind_); }
+  F&& TakeHBlindsPolyEval() && { return std::move(h_blinds_poly_eval_); }
   VanishingCommitted<EntityTy::kProver, PCSTy>&& TakeCommitted() && {
     return std::move(committed_);
   }
 
  private:
   Poly h_poly_;
-  F h_blind_;
+  F h_blinds_poly_eval_;
   VanishingCommitted<EntityTy::kProver, PCSTy> committed_;
 };
 

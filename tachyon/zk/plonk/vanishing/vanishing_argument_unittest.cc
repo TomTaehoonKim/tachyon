@@ -23,19 +23,19 @@ class VanishingArgumentTest : public Halo2ProverTest {};
 
 TEST_F(VanishingArgumentTest, VanishingArgument) {
   VanishingCommitted<EntityTy::kProver, PCS> committed_p;
-  ASSERT_TRUE(VanishingCommit(prover_.get(), &committed_p));
+  ASSERT_TRUE(CommitRandomPoly(prover_.get(), &committed_p));
 
   ExtendedEvals extended_evals = ExtendedEvals::One(kMaxExtendedDegree);
   VanishingConstructed<EntityTy::kProver, PCS> constructed_p;
-  ASSERT_TRUE(VanishingConstruct(prover_.get(), std::move(committed_p),
+  ASSERT_TRUE(CommitFinalHPoly(prover_.get(), std::move(committed_p),
                                  extended_evals, &constructed_p));
 
   crypto::Challenge255<F> x(F::One());
   VanishingEvaluated<EntityTy::kProver, PCS> evaluated;
-  ASSERT_TRUE(VanishingEvaluate(prover_->pcs(), std::move(constructed_p), x,
+  ASSERT_TRUE(CommitRandomEval(prover_->pcs(), std::move(constructed_p), x,
                                 F::One(), prover_->GetWriter(), &evaluated));
 
-  std::vector<ProverQuery<PCS>> h_x = VanishingOpen(std::move(evaluated), x);
+  std::vector<ProverQuery<PCS>> h_x = OpenVanishingArgument(std::move(evaluated), x);
 
   base::Buffer read_buf(prover_->GetWriter()->buffer().buffer(),
                         prover_->GetWriter()->buffer().buffer_len());
@@ -65,9 +65,9 @@ TEST_F(VanishingArgumentTest, VanishingArgument) {
   crypto::Challenge255<F> y(F::One());
   Evals evals = Evals::One(kMaxDegree);
   VanishingEvaluated<EntityTy::kVerifier, PCS> evaluated_v =
-      VanishingVerify(std::move(partially_evaluated_v), evals, y, F(2));
+      VerifyVanishingArgument(std::move(partially_evaluated_v), evals, y, F(2));
 
-  VanishingQueries(std::move(evaluated_v), x);
+  QueryVanishingArgument(std::move(evaluated_v), x);
 }
 
 }  // namespace tachyon::zk

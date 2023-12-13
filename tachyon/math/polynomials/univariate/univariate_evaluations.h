@@ -87,7 +87,7 @@ class UnivariateEvaluations final
   }
 
   constexpr const std::vector<F>& evaluations() const { return evaluations_; }
-  constexpr std::vector<F>& evaluations() { return evaluations_; }
+  constexpr std::vector<F>& evaluations_ref() { return evaluations_; }
 
   // NOTE(chokobole): Sometimes, this degree doesn't match with the exact
   // degree of the coefficients that is produced by IFFT. I leave it for

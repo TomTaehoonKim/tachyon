@@ -22,17 +22,18 @@ template <typename PCSTy>
 class VanishingConstructed<EntityTy::kProver, PCSTy> {
  public:
   using F = typename PCSTy::Field;
+  using Poly = typename PCSTy::Poly;
   using ExtendedPoly = typename PCSTy::ExtendedPoly;
 
   VanishingConstructed() = default;
-  VanishingConstructed(ExtendedPoly&& h_poly, std::vector<F>&& h_blinds,
+  VanishingConstructed(ExtendedPoly&& h_poly, Poly&& h_blinds_poly,
                        VanishingCommitted<EntityTy::kProver, PCSTy>&& committed)
       : h_poly_(std::move(h_poly)),
-        h_blinds_(std::move(h_blinds)),
+        h_blinds_poly_(std::move(h_blinds_poly)),
         committed_(std::move(committed)) {}
 
   const ExtendedPoly& h_poly() const { return h_poly_; }
-  const std::vector<F>& h_blinds() const { return h_blinds_; }
+  const Poly& h_blinds_poly() const { return h_blinds_poly_; }
 
   VanishingCommitted<EntityTy::kProver, PCSTy>&& TakeCommitted() && {
     return std::move(committed_);
@@ -40,7 +41,7 @@ class VanishingConstructed<EntityTy::kProver, PCSTy> {
 
  private:
   ExtendedPoly h_poly_;
-  std::vector<F> h_blinds_;
+  Poly h_blinds_poly_;
   VanishingCommitted<EntityTy::kProver, PCSTy> committed_;
 };
 
