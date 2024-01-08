@@ -53,6 +53,26 @@ TYPED_TEST(ColumnKeyTest, Hash) {
       std::make_tuple(ColumnKey(), ColumnKey(1))));
 }
 
+TEST(ColumnKeyBaseTest, Order) {
+  EXPECT_DEATH(
+      {
+        if (AnyColumnKey(0) < FixedColumnKey(0)) {
+        }
+      },
+      "");
+  // EXPECT_DEATH(
+  //     {
+  //       if (FixedColumnKey(0) < AnyColumnKey(0)) {
+  //       }
+  //     },
+  //     "");
+
+  EXPECT_FALSE(FixedColumnKey(0) < FixedColumnKey(0));
+  EXPECT_FALSE(FixedColumnKey(0) < FixedColumnKey(1));
+  EXPECT_TRUE(InstanceColumnKey(0) < FixedColumnKey(0));
+  EXPECT_TRUE(InstanceColumnKey(1) < FixedColumnKey(0));
+}
+
 TEST(ColumnKeyBaseTest, Hash) {
   EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(
       std::make_tuple(ColumnKeyBase(), ColumnKeyBase(ColumnType::kFixed, 0),
