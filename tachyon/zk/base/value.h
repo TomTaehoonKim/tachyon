@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 
+#include "tachyon/base/functional/callback.h"
 #include "tachyon/math/base/rational_field.h"
 
 namespace tachyon::zk {
@@ -43,6 +44,14 @@ class Value : public math::Field<Value<T>> {
   }
 
   constexpr bool IsNone() const { return !value_.has_value(); }
+
+  // Returns |Value::UnKnown()| if the value is |Value::Unknown()|, otherwise
+  // calls |f| with the wrapped value and returns the result.
+  template <typename W>
+  constexpr Value<W> AndThen(base::OnceCallback<Value<W>(T)> f) const {
+    if (IsNone()) return Unknown();
+    return f.Run(value_);
+  }
 
   std::string ToString() const {
     if (IsNone()) return "None";

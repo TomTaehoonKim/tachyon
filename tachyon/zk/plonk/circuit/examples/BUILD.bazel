@@ -10,20 +10,52 @@ tachyon_cc_library(
 )
 
 tachyon_cc_library(
+    name = "fibonacci_circuits",
+    hdrs = [
+        "fibonacci_circuit.h",
+        "fibonacci_circuit2.h",
+        "fibonacci_circuit3.h",
+        "fibonacci_circuit4.h",
+    ],
+    deps = [
+        ":is_zero_chip",
+        "//tachyon/zk/plonk/circuit",
+        "//tachyon/zk/plonk/circuit:assigned_cell",
+    ],
+)
+
+tachyon_cc_library(
+    name = "is_zero_chip",
+    hdrs = ["is_zero_chip.h"],
+    deps = [
+        "//tachyon/zk/expressions:expression_factory",
+        "//tachyon/zk/plonk:constraint_system",
+        "//tachyon/zk/plonk/circuit:region",
+    ],
+)
+
+tachyon_cc_library(
     name = "simple_circuit",
     hdrs = ["simple_circuit.h"],
-    deps = ["//tachyon/zk/plonk/circuit"],
+    deps = [
+        "//tachyon/zk/plonk/circuit",
+        "//tachyon/zk/plonk/circuit:virtual_cells",
+    ],
 )
 
 tachyon_cc_library(
     name = "simple_lookup_circuit",
     hdrs = ["simple_lookup_circuit.h"],
-    deps = ["//tachyon/zk/plonk/circuit"],
+    deps = [
+        "//tachyon/zk/plonk/circuit",
+        "//tachyon/zk/plonk/circuit:virtual_cells",
+    ],
 )
 
 tachyon_cc_unittest(
     name = "examples_unittests",
     srcs = [
+        "fibonacci_circuit_unittest.cc",
         "simple_circuit_unittest.cc",
         "simple_lookup_circuit_unittest.cc",
         "simple_lookup_v1_circuit_unittest.cc",
@@ -31,6 +63,7 @@ tachyon_cc_unittest(
     ],
     deps = [
         ":circuit_test",
+        ":fibonacci_circuits",
         ":simple_circuit",
         ":simple_lookup_circuit",
         "//tachyon/zk/plonk/circuit/floor_planner:simple_floor_planner",

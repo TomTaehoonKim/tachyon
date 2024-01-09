@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "tachyon/zk/plonk/circuit/circuit.h"
+#include "tachyon/zk/plonk/circuit/virtual_cells.h"
 
 namespace tachyon::zk {
 

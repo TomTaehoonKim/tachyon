@@ -12,7 +12,9 @@
 #include <utility>
 #include <vector>
 
+#include "tachyon/zk/plonk/circuit/assigned_cell.h"
 #include "tachyon/zk/plonk/circuit/circuit.h"
+#include "tachyon/zk/plonk/circuit/virtual_cells.h"
 
 namespace tachyon::zk {
 
@@ -21,7 +23,7 @@ namespace tachyon::zk {
 template <typename F>
 class FieldConfig {
  public:
-  using Field = F;
+  using Field = F;  // Do we need this?
 
   FieldConfig() = default;
   FieldConfig(std::array<AdviceColumnKey, 2>&& advice,
