@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "tachyon/zk/plonk/constraint_system/circuit.h"
+#include "tachyon/zk/plonk/constraint_system/virtual_cells.h"
 
 namespace tachyon::zk::plonk {
 

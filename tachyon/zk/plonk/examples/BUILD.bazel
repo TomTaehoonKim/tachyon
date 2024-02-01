@@ -10,19 +10,181 @@ tachyon_cc_library(
 )
 
 tachyon_cc_library(
+    name = "fibonacci1_circuit",
+    testonly = True,
+    hdrs = ["fibonacci1_circuit.h"],
+    deps = [
+        "//tachyon/zk/plonk/constraint_system:circuit",
+        "//tachyon/zk/plonk/constraint_system:virtual_cells",
+        "//tachyon/zk/plonk/layout:assigned_cell",
+    ],
+)
+
+tachyon_cc_library(
+    name = "fibonacci2_circuit",
+    testonly = True,
+    hdrs = ["fibonacci2_circuit.h"],
+    deps = [
+        "//tachyon/zk/plonk/constraint_system:circuit",
+        "//tachyon/zk/plonk/constraint_system:virtual_cells",
+        "//tachyon/zk/plonk/layout:assigned_cell",
+    ],
+)
+
+tachyon_cc_library(
+    name = "fibonacci3_circuit",
+    testonly = True,
+    hdrs = ["fibonacci3_circuit.h"],
+    deps = [
+        ":is_zero_chip",
+        "//tachyon/zk/plonk/constraint_system:circuit",
+        "//tachyon/zk/plonk/constraint_system:virtual_cells",
+        "//tachyon/zk/plonk/layout:assigned_cell",
+    ],
+)
+
+tachyon_cc_library(
+    name = "fibonacci4_circuit",
+    testonly = True,
+    hdrs = ["fibonacci4_circuit.h"],
+    deps = [
+        "//tachyon/zk/plonk/constraint_system:circuit",
+        "//tachyon/zk/plonk/constraint_system:virtual_cells",
+        "//tachyon/zk/plonk/layout:assigned_cell",
+    ],
+)
+
+tachyon_cc_library(
+    name = "is_zero_chip",
+    testonly = True,
+    hdrs = ["is_zero_chip.h"],
+    deps = [
+        "//tachyon/zk/expressions:expression_factory",
+        "//tachyon/zk/plonk/constraint_system",
+        "//tachyon/zk/plonk/layout:region",
+    ],
+)
+
+tachyon_cc_library(
     name = "simple_circuit",
+    testonly = True,
     hdrs = ["simple_circuit.h"],
-    deps = ["//tachyon/zk/plonk/constraint_system:circuit"],
+    deps = [
+        "//tachyon/zk/plonk/constraint_system:circuit",
+        "//tachyon/zk/plonk/constraint_system:virtual_cells",
+        "//tachyon/zk/plonk/layout:assigned_cell",
+    ],
 )
 
 tachyon_cc_library(
     name = "simple_lookup_circuit",
+    testonly = True,
     hdrs = ["simple_lookup_circuit.h"],
-    deps = ["//tachyon/zk/plonk/constraint_system:circuit"],
+    deps = [
+        "//tachyon/zk/plonk/constraint_system:circuit",
+        "//tachyon/zk/plonk/constraint_system:virtual_cells",
+        "//tachyon/zk/plonk/layout:assigned_cell",
+    ],
 )
 
 # TODO(dongchangYoo): This is failed in CI because of timeout, 60 secs.
 # Change |tachyon_cc_test| to |tachyon_cc_unittest| once CI can run within the timeout.
+tachyon_cc_test(
+    name = "fibonacci1_circuit_test",
+    srcs = ["fibonacci1_circuit_test.cc"],
+    deps = [
+        ":circuit_test",
+        ":fibonacci1_circuit",
+        "//tachyon/zk/plonk/halo2:pinned_verifying_key",
+        "//tachyon/zk/plonk/keys:proving_key",
+        "//tachyon/zk/plonk/layout/floor_planner:simple_floor_planner",
+    ],
+)
+
+tachyon_cc_test(
+    name = "fibonacci1_v1_circuit_test",
+    srcs = ["fibonacci1_v1_circuit_test.cc"],
+    deps = [
+        ":circuit_test",
+        ":fibonacci1_circuit",
+        "//tachyon/zk/plonk/halo2:pinned_verifying_key",
+        "//tachyon/zk/plonk/keys:proving_key",
+        "//tachyon/zk/plonk/layout/floor_planner/v1:v1_floor_planner",
+    ],
+)
+
+tachyon_cc_test(
+    name = "fibonacci2_circuit_test",
+    srcs = ["fibonacci2_circuit_test.cc"],
+    deps = [
+        ":circuit_test",
+        ":fibonacci2_circuit",
+        "//tachyon/zk/plonk/halo2:pinned_verifying_key",
+        "//tachyon/zk/plonk/keys:proving_key",
+        "//tachyon/zk/plonk/layout/floor_planner:simple_floor_planner",
+    ],
+)
+
+tachyon_cc_test(
+    name = "fibonacci2_v1_circuit_test",
+    srcs = ["fibonacci2_v1_circuit_test.cc"],
+    deps = [
+        ":circuit_test",
+        ":fibonacci2_circuit",
+        "//tachyon/zk/plonk/halo2:pinned_verifying_key",
+        "//tachyon/zk/plonk/keys:proving_key",
+        "//tachyon/zk/plonk/layout/floor_planner/v1:v1_floor_planner",
+    ],
+)
+
+tachyon_cc_test(
+    name = "fibonacci3_circuit_test",
+    srcs = ["fibonacci3_circuit_test.cc"],
+    deps = [
+        ":circuit_test",
+        ":fibonacci3_circuit",
+        "//tachyon/zk/plonk/halo2:pinned_verifying_key",
+        "//tachyon/zk/plonk/keys:proving_key",
+        "//tachyon/zk/plonk/layout/floor_planner:simple_floor_planner",
+    ],
+)
+
+tachyon_cc_test(
+    name = "fibonacci3_v1_circuit_test",
+    srcs = ["fibonacci3_v1_circuit_test.cc"],
+    deps = [
+        ":circuit_test",
+        ":fibonacci3_circuit",
+        "//tachyon/zk/plonk/halo2:pinned_verifying_key",
+        "//tachyon/zk/plonk/keys:proving_key",
+        "//tachyon/zk/plonk/layout/floor_planner/v1:v1_floor_planner",
+    ],
+)
+
+tachyon_cc_test(
+    name = "fibonacci4_circuit_test",
+    srcs = ["fibonacci4_circuit_test.cc"],
+    deps = [
+        ":circuit_test",
+        ":fibonacci4_circuit",
+        "//tachyon/zk/plonk/halo2:pinned_verifying_key",
+        "//tachyon/zk/plonk/keys:proving_key",
+        "//tachyon/zk/plonk/layout/floor_planner:simple_floor_planner",
+    ],
+)
+
+tachyon_cc_test(
+    name = "fibonacci4_v1_circuit_test",
+    srcs = ["fibonacci4_v1_circuit_test.cc"],
+    deps = [
+        ":circuit_test",
+        ":fibonacci4_circuit",
+        "//tachyon/zk/plonk/halo2:pinned_verifying_key",
+        "//tachyon/zk/plonk/keys:proving_key",
+        "//tachyon/zk/plonk/layout/floor_planner/v1:v1_floor_planner",
+    ],
+)
+
 tachyon_cc_test(
     name = "simple_circuit_test",
     srcs = ["simple_circuit_test.cc"],
