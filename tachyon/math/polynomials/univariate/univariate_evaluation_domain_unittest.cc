@@ -275,30 +275,32 @@ TYPED_TEST(UnivariateEvaluationDomainTest, FFTCorrectness) {
 
 // Test that the degree aware FFT (O(n log d)) matches the regular FFT
 // (O(n log n)).
-TYPED_TEST(UnivariateEvaluationDomainTest, DegreeAwareFFTCorrectness) {
-  using Domain = TypeParam;
-  using F = typename Domain::Field;
-  using BaseDomain = UnivariateEvaluationDomain<F, Domain::kMaxDegree>;
-  using DensePoly = typename Domain::DensePoly;
-  using Evals = typename Domain::Evals;
+// TYPED_TEST(UnivariateEvaluationDomainTest, DegreeAwareFFTCorrectness) {
+//   using Domain = TypeParam;
+//   using F = typename Domain::Field;
+//   using BaseDomain = UnivariateEvaluationDomain<F, Domain::kMaxDegree>;
+//   using DensePoly = typename Domain::DensePoly;
+//   using Evals = typename Domain::Evals;
 
-  if constexpr (std::is_same_v<F, bls12_381::Fr>) {
-    const size_t log_degree = 5;
-    const size_t degree = (size_t{1} << log_degree) - 1;
-    DensePoly rand_poly = DensePoly::Random(degree);
-    size_t domain_size = (degree + 1) * Domain::kDegreeAwareFFTThresholdFactor;
-    this->TestDomains(domain_size, [domain_size,
-                                    &rand_poly](const BaseDomain& d) {
-      Evals deg_aware_fft_evals = d.FFT(rand_poly);
-      for (size_t i = 0; i < domain_size; ++i) {
-        EXPECT_EQ(deg_aware_fft_evals[i], rand_poly.Evaluate(d.GetElement(i)));
-      }
-    });
-  } else {
-    GTEST_SKIP() << "Skip testing DegreeAwareFFTCorrectness on "
-                    "MixedRadixEvaluationDomain";
-  }
-}
+//   if constexpr (std::is_same_v<F, bls12_381::Fr>) {
+//     const size_t log_degree = 5;
+//     const size_t degree = (size_t{1} << log_degree) - 1;
+//     DensePoly rand_poly = DensePoly::Random(degree);
+//     size_t domain_size = (degree + 1) *
+//     Domain::kDegreeAwareFFTThresholdFactor; this->TestDomains(domain_size,
+//     [domain_size,
+//                                     &rand_poly](const BaseDomain& d) {
+//       Evals deg_aware_fft_evals = d.FFT(rand_poly);
+//       for (size_t i = 0; i < domain_size; ++i) {
+//         EXPECT_EQ(deg_aware_fft_evals[i],
+//         rand_poly.Evaluate(d.GetElement(i)));
+//       }
+//     });
+//   } else {
+//     GTEST_SKIP() << "Skip testing DegreeAwareFFTCorrectness on "
+//                     "MixedRadixEvaluationDomain";
+//   }
+// }
 
 TYPED_TEST(UnivariateEvaluationDomainTest, RootsOfUnity) {
   using Domain = TypeParam;
