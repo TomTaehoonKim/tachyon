@@ -463,7 +463,7 @@ mod test {
             proof.extend_from_slice(&proof_last);
             proof
         };
-        // assert_eq!(halo2_poseidon_proof, tachyon_poseidon_proof);
+        assert_eq!(halo2_poseidon_proof, tachyon_poseidon_proof);
 
         let halo2_sha256_proof = {
             let mut transcript =

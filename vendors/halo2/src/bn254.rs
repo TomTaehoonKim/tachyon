@@ -323,16 +323,21 @@ impl<W: Write, C: CurveAffine> Transcript<C, Challenge255<C>>
                 "cannot write points at infinity to the transcript",
             )
         })?;
-        let x = coords.x();
-        let y = coords.y();
-        let slice = &[base_to_scalar::<C>(x), base_to_scalar::<C>(y)];
-        let bytes = std::mem::size_of::<C::Scalar>() * 2;
-        unsafe {
-            self.state.pin_mut().update(std::slice::from_raw_parts(
-                slice.as_ptr() as *const u8,
-                bytes,
-            ));
-        }
+        // let x = coords.x();
+        // let y = coords.y();
+        // let slice = &[base_to_scalar::<C>(x), base_to_scalar::<C>(y)];
+        // let bytes = std::mem::size_of::<C::Scalar>() * 2;
+        // //
+        // unsafe {
+        //     self.state.pin_mut().update(std::slice::from_raw_parts(
+        //         slice.as_ptr() as *const u8,
+        //         bytes,
+        //     ));
+        // }
+        self.state.pin_mut().update(&[
+            base_to_scalar::<C>(coords.x()).to_repr().as_ref(),
+            base_to_scalar::<C>(coords.y()).to_repr().as_ref(),
+        ]);
 
         Ok(())
     }
