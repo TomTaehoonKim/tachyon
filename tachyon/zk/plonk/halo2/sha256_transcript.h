@@ -168,7 +168,9 @@ class Sha256Writer : public crypto::TranscriptWriter<AffinePoint>,
 
  private:
   bool DoWriteToProof(const AffinePoint& point) override {
-    return ProofSerializer<AffinePoint>::WriteToProof(point, this->buffer_);
+    math::BigInt<4> x = point.x().ToBigInt();
+    math::BigInt<4> y = point.y().ToBigInt();
+    return this->buffer_.Write(x.limbs) && this->buffer_.Write(y.limbs);
   }
 
   bool DoWriteToProof(const ScalarField& scalar) override {
