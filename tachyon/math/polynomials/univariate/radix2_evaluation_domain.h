@@ -93,8 +93,21 @@ class Radix2EvaluationDomain : public UnivariateEvaluationDomain<F, MaxDegree> {
     if (!this->offset_.IsOne()) {
       Base::DistributePowers(evals, this->offset_);
     }
-    evals.evaluations_.resize(this->size_, F::Zero());
-    BestFFT(evals.evaluations_, this->group_gen_);
+    // evals.evaluations_.resize(this->size_, F::Zero());
+    BestFFT(std::move(evals.evaluations_), this->group_gen_);
+    return evals;
+  }
+
+  [[nodiscard]] constexpr Evals FFT(DensePoly&& poly) const override {
+    if (poly.IsZero()) return {};
+
+    Evals evals;
+    evals.evaluations_ = std::move(poly.coefficients_.coefficients_);
+    if (!this->offset_.IsOne()) {
+      Base::DistributePowers(evals, this->offset_);
+    }
+    // evals.evaluations_.resize(this->size_, F::Zero());
+    BestFFT(std::move(evals.evaluations_), this->group_gen_);
     return evals;
   }
 
@@ -136,7 +149,7 @@ class Radix2EvaluationDomain : public UnivariateEvaluationDomain<F, MaxDegree> {
   }
 
   template <typename PolyOrEvals>
-  void BestFFT(PolyOrEvals& poly_or_evals, const F& omega) const {
+  void BestFFT(PolyOrEvals&& poly_or_evals, const F& omega) const {
 #if defined(TACHYON_HAS_OPENMP)
     uint32_t thread_nums = static_cast<uint32_t>(omp_get_max_threads());
     size_t log_split = base::bits::Log2Floor(thread_nums);
